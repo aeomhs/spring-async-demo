@@ -1,5 +1,6 @@
 package com.example.demo.web;
 
+import com.example.demo.domain.UserSubmitHolder;
 import com.example.demo.service.SubmitService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -17,21 +18,14 @@ public class SubmitController {
         this.submitService = submitService;
     }
 
-    @PostMapping("/{id}/submit")
+    @PostMapping("/{roomCode}/submit/{clientId}")
     @ResponseBody
-    public Callable<String> submit(@PathVariable Long id, @RequestBody String msg) {
+    public Callable<String> submit(@PathVariable String roomCode, @PathVariable Long clientId, @RequestBody String msg) {
+        return () -> {
+            submitService.submit(roomCode, new UserSubmitHolder(clientId, msg));
 
-        return new Callable<String>() {
-            @Override
-            public String call() throws Exception {
-                submitService.submit(id, msg);
-
-                //TODO Time Out Logic 필요!
-                while (!submitService.isDone(id)) {
-                    Thread.sleep(1000);
-                }
-                return submitService.getResult(id);
-            }
+            // Blocked
+            return submitService.getResult(roomCode);
         };
     }
 }

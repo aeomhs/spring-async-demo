@@ -1,34 +1,39 @@
 package com.example.demo.service;
 
 
+import com.example.demo.domain.UserSubmitHolder;
+
 import java.util.Deque;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class SubmitPool {
 
-    private int nClient;
+    private final BlockingQueue<String> resultHolder;
 
-    private Deque<String> submitted;
+    private static final int nClient = 3;
 
-    private boolean isDone;
+    private final Deque<UserSubmitHolder> submitted;
 
     public SubmitPool() {
-        this(3);
-    }
-
-    public SubmitPool(int nClient) {
-        this.nClient = nClient;
+        this.resultHolder = new ArrayBlockingQueue<>(nClient);
         this.submitted = new ConcurrentLinkedDeque<>();
-        isDone = false;
     }
 
-    public void add(String msg) {
-        submitted.add(msg);
-        if (submitted.size() == nClient)
-            isDone = true;
+    public String getResult() throws InterruptedException {
+        return resultHolder.take();
     }
 
-    public boolean isDone() {
-        return isDone;
+    public void add(UserSubmitHolder submitHolder) throws InterruptedException {
+        submitted.add(submitHolder);
+        if (nClient == submitted.size())
+            generateResult();
+    }
+
+    private void generateResult() throws InterruptedException {
+        for (int i = 0; i < nClient; i++) {
+            resultHolder.put("Done!");
+        }
     }
 }
