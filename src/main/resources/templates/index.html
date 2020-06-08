@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Async Request</title>
+</head>
+<body>
+    Hello World! #Room 1
+    <div>
+        <input type="text" id="result" disabled>
+        <button id="btn1" onclick="handler(1)">button1</button>
+        <button id="btn2" onclick="handler(2)">button2</button>
+        <button id="btn3" onclick="handler(3)">button3</button>
+    </div>
+</body>
+<script>
+
+    const roomId = 1;
+
+    let handler = function (id) {
+        document.getElementById("btn"+id).disabled = true;
+        const resultBox = document.getElementById("result");
+        request().then((value => resultBox.value = value));
+    };
+
+    let request = function () {
+        const url = "/"+roomId+"/submit";
+        const option = {
+            method: 'POST',
+            body: String(roomId),
+        };
+        return fetch(url, option).then((res)=>res.text());
+    };
+
+</script>
+</html>
